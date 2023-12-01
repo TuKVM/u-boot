@@ -15,7 +15,7 @@
 	};
 
 	chosen {
-		stdout-path = "serial3:115200n8";
+		stdout-path = "serial1:115200n8";
 	};
 
 	leds {
@@ -113,7 +113,7 @@
 &uart1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&uart1_pg6_pins>;
-	status = "disabled";
+	status = "okay";
 };
 
 &uart2 {
@@ -125,7 +125,7 @@
 &uart3 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&uart3_pb_pins>;
-	status = "okay";
+	status = "disabled";
 };
 
 /* The USB-C socket has its CC pins pulled to GND, so is hardwired as a UFP. */
