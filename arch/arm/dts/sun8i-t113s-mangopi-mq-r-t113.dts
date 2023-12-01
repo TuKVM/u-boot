@@ -33,3 +33,30 @@
 		interrupt-names = "host-wake";
 	};
 };
+
+&spi0 {
+	pinctrl-0 = <&spi0_pins>;
+	pinctrl-names = "default";
+	status = "okay";
+
+	flash@0 {
+		compatible = "spi-nand";
+		reg = <0>;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@0 {
+				label = "uboot";
+				reg = <0x00000000 0x00080000>;
+			};
+
+			partition@80000 {
+				label = "ubi";
+				reg = <0x00080000 0x0fb00000>;
+			};
+		};
+	};
+};
