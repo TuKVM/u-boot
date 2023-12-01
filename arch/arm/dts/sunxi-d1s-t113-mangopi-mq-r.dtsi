@@ -9,6 +9,8 @@
 
 / {
 	aliases {
+		serial1 = &uart1;
+		serial2 = &uart2;
 		serial3 = &uart3;
 	};
 
@@ -106,6 +108,18 @@
 	vcc-pe-supply = <&reg_avdd2v8>;
 	vcc-pf-supply = <&reg_3v3>;
 	vcc-pg-supply = <&reg_3v3>;
+};
+
+&uart1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart1_pg6_pins>;
+	status = "disabled";
+};
+
+&uart2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart2_pe_pins>;
+	status = "disabled";
 };
 
 &uart3 {

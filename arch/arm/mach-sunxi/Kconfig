@@ -729,6 +729,12 @@ config UART0_PORT_F
 	at the same time, the system can be only booted in the FEL mode.
 	Only enable this if you really know what you are doing.
 
+config UART2_PORT_E
+	bool "UART2 on PE2 and PE3 pins"
+	---help---
+	UART2 may used pins PE2 and PE3 on the Allwinner T113 board.
+	Enable this if you are using these pins for UART2.
+
 config OLD_SUNXI_KERNEL_COMPAT
 	bool "Enable workarounds for booting old kernels"
 	---help---
