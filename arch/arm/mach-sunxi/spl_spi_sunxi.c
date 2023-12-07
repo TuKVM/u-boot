@@ -459,6 +459,7 @@ static int spl_spi_load_image(struct spl_image_info *spl_image,
 	int ret = 0;
 	uint32_t load_offset = sunxi_get_spl_size();
 	struct spl_load_info load;
+	bool allow_raw = false;
 
 	load_offset = max_t(uint32_t, load_offset, CONFIG_SYS_SPI_U_BOOT_OFFS);
 
@@ -469,21 +470,28 @@ static int spl_spi_load_image(struct spl_image_info *spl_image,
 
 	spi0_init();
 
+	switch (bootdev->boot_device) {
 #if defined(CONFIG_SPL_SPI_SUNXI_NAND)
-	spi0_nand_reset();
-	load.read = spi_load_read_nand;
-	ret = spl_spi_try_load(spl_image, bootdev, &load, load_offset, false);
-	if (!ret)
-		goto out;
+	case BOOT_DEVICE_SPINAND:
+		spi0_nand_reset();
+		load.read = spi_load_read_nand;
+		break;
 #endif
+	case BOOT_DEVICE_SPI:
+		load.read = spi_load_read_nor;
+		allow_raw = true;
+		break;
+	}
 
-	load.read = spi_load_read_nor;
-	ret = spl_spi_try_load(spl_image, bootdev, &load, load_offset, true);
+	ret = spl_spi_try_load(spl_image, bootdev, &load, load_offset, allow_raw);
 
-out:
 	spi0_deinit();
 
 	return ret;
 }
 /* Use priorty 0 to override the default if it happens to be linked in */
 SPL_LOAD_IMAGE_METHOD("sunxi SPI", 0, BOOT_DEVICE_SPI, spl_spi_load_image);
+
+#if defined(CONFIG_SPL_SPI_SUNXI_NAND)
+SPL_LOAD_IMAGE_METHOD("sunxi SPI NAND", 0, BOOT_DEVICE_SPINAND, spl_spi_load_image);
+#endif
