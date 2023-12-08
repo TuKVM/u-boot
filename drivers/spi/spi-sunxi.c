@@ -128,6 +128,7 @@ struct sun4i_spi_variant {
 	u32 fifo_depth;
 	bool has_soft_reset;
 	bool has_burst_ctl;
+	bool clock_d1;
 };
 
 struct sun4i_spi_plat {
@@ -229,7 +230,7 @@ err_ahb:
 	return ret;
 }
 
-static void sun4i_spi_set_speed_mode(struct udevice *dev)
+static void sun4i_spi_adjust_clock(struct udevice *dev)
 {
 	struct sun4i_spi_priv *priv = dev_get_priv(dev);
 	unsigned int div;
@@ -270,6 +271,22 @@ static void sun4i_spi_set_speed_mode(struct udevice *dev)
 	}
 
 	writel(reg, SPI_REG(priv, SPI_CCR));
+}
+
+static void sun4i_spi_adjust_clock_d1(struct udevice *dev)
+{
+	/* Do nothing for now: We run at HOSC 24MHz by default */
+}
+
+static void sun4i_spi_set_speed_mode(struct udevice *dev)
+{
+	struct sun4i_spi_priv *priv = dev_get_priv(dev);
+	u32 reg;
+
+	if (priv->variant->clock_d1)
+		sun4i_spi_adjust_clock_d1(dev->parent);
+	else
+		sun4i_spi_adjust_clock(dev->parent);
 
 	reg = readl(SPI_REG(priv, SPI_TCR));
 	reg &= ~(SPI_BIT(priv, SPI_TCR_CPOL) | SPI_BIT(priv, SPI_TCR_CPHA));
@@ -550,6 +567,7 @@ static const struct sun4i_spi_variant sun50i_r329_spi_variant = {
 	.fifo_depth		= 64,
 	.has_soft_reset		= true,
 	.has_burst_ctl		= true,
+	.clock_d1		= true,
 };
 
 static const struct udevice_id sun4i_spi_ids[] = {
