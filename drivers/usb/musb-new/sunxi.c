@@ -283,6 +283,17 @@ static void sunxi_musb_disable(struct musb *musb)
 	enabled = false;
 }
 
+#ifdef CONFIG_DM_USB_GADGET
+int dm_usb_gadget_handle_interrupts(struct udevice *dev)
+{
+	struct sunxi_glue *glue = dev_get_priv(dev);
+	struct musb_host_data *host = &glue->mdata;
+
+	host->host->isr(0, host->host);
+	return 0;
+}
+#endif
+
 static int sunxi_musb_init(struct musb *musb)
 {
 	struct sunxi_glue *glue = to_sunxi_glue(musb->controller);
@@ -431,15 +442,12 @@ static struct musb_hdrc_config musb_config_h3 = {
 
 static int musb_usb_probe(struct udevice *dev)
 {
+	struct usb_bus_priv *priv = dev_get_uclass_priv(dev);
 	struct sunxi_glue *glue = dev_get_priv(dev);
 	struct musb_host_data *host = &glue->mdata;
 	struct musb_hdrc_platform_data pdata;
 	void *base = dev_read_addr_ptr(dev);
 	int ret;
-
-#ifdef CONFIG_USB_MUSB_HOST
-	struct usb_bus_priv *priv = dev_get_uclass_priv(dev);
-#endif
 
 	if (!base)
 		return -EINVAL;
@@ -471,25 +479,29 @@ static int musb_usb_probe(struct udevice *dev)
 	pdata.platform_ops = &sunxi_musb_ops;
 	pdata.config = glue->cfg->config;
 
-#ifdef CONFIG_USB_MUSB_HOST
-	priv->desc_before_addr = true;
+	if (IS_ENABLED(CONFIG_USB_MUSB_HOST)) {
+		priv->desc_before_addr = true;
 
-	pdata.mode = MUSB_HOST;
-	host->host = musb_init_controller(&pdata, &glue->dev, base);
-	if (!host->host)
-		return -EIO;
+		pdata.mode = MUSB_HOST;
+		host->host = musb_init_controller(&pdata, &glue->dev, base);
+		if (!host->host)
+			return -EIO;
 
-	ret = musb_lowlevel_init(host);
-	if (!ret)
-		printf("Allwinner mUSB OTG (Host)\n");
-#else
-	pdata.mode = MUSB_PERIPHERAL;
+		return musb_lowlevel_init(host);
+	} else if (CONFIG_IS_ENABLED(DM_USB_GADGET)) {
+		pdata.mode = MUSB_PERIPHERAL;
+		host->host = musb_init_controller(&pdata, &glue->dev, base);
+		if (!host->host)
+			return -EIO;
+
+		printf("Allwinner mUSB OTG (Peripheral)\n");
+		musb_gadget_setup(host->host);
+		return usb_add_gadget_udc(&glue->dev, &host->host->g);
+	}
+
 	host->host = musb_register(&pdata, &glue->dev, base);
 	if (IS_ERR_OR_NULL(host->host))
 		return -EIO;
-
-	printf("Allwinner mUSB OTG (Peripheral)\n");
-#endif
 
 	return ret;
 }
