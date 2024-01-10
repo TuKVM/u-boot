@@ -729,6 +729,11 @@ config UART0_PORT_F
 	at the same time, the system can be only booted in the FEL mode.
 	Only enable this if you really know what you are doing.
 
+config UART2_PORT_G
+	bool "UART2 on Port G"
+	---help---
+	Select this option for boards where UART2 uses the Port G pinmux.
+
 config UART2_PORT_E
 	bool "UART2 on PE2 and PE3 pins"
 	---help---

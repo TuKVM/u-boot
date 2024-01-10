@@ -172,6 +172,10 @@ static int gpio_init(void)
 	sunxi_gpio_set_cfgpin(SUNXI_GPE(2), 3);
 	sunxi_gpio_set_cfgpin(SUNXI_GPE(3), 3);
 	sunxi_gpio_set_pull(SUNXI_GPE(2), SUNXI_GPIO_PULL_UP);
+#elif IS_ENABLED(CONFIG_UART2_PORT_G)
+	sunxi_gpio_set_cfgpin(SUNXI_GPG(17), SUN8I_R528_GPG_UART2);
+	sunxi_gpio_set_cfgpin(SUNXI_GPG(18), SUN8I_R528_GPG_UART2);
+	sunxi_gpio_set_pull(SUNXI_GPG(18), SUNXI_GPIO_PULL_UP);
 #else
 	sunxi_gpio_set_cfgpin(SUNXI_GPB(0), 7);
 	sunxi_gpio_set_cfgpin(SUNXI_GPB(1), 7);
@@ -475,6 +479,8 @@ u32 spl_mmc_boot_mode(struct mmc *mmc, const u32 boot_device)
 void board_init_f(ulong dummy)
 {
 	sunxi_sram_init();
+
+	spl_early_init();
 
 #if defined CONFIG_MACH_SUN6I || defined CONFIG_MACH_SUN8I_H3
 	/* Enable non-secure access to some peripherals */
