@@ -1,0 +1,94 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+// Copyright (C) 2022 Arm Ltd.
+
+#include <dt-bindings/interrupt-controller/irq.h>
+
+/dts-v1/;
+
+#include "sun8i-t113i.dtsi"
+#include "sunxi-t113i-tronlong-tlt113.dtsi"
+
+/ {
+	model = "TuKVM PCIe";
+	compatible = "tukvm,tukvm-pcie", "allwinner,sun8i-t113i";
+
+	chosen {
+		stdout-path = "serial0:115200n8";
+	};
+
+	aliases {
+		serial0 = &uart0;
+		ethernet0 = &emac;
+		mmc0 = &mmc0;
+		mmc1 = &mmc2;
+	};
+};
+
+&pio {
+	uart0_pg_pins: uart0-pg-pins {
+		pins = "PG17", "PG18";
+		function = "uart0";
+	};
+};
+
+&cpu0 {
+	cpu-supply = <&reg_vcc_core>;
+};
+
+&cpu1 {
+	cpu-supply = <&reg_vcc_core>;
+};
+
+&uart0 {
+	bootph-all;
+	pinctrl-0 = <&uart0_pg_pins>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&uart2 {
+	status = "disabled";
+};
+
+&spi0 {
+	status = "disabled";
+};
+
+&mmc0 {
+	bootph-all;
+	pinctrl-0 = <&mmc0_pins>;
+	pinctrl-names = "default";
+	vmmc-supply = <&reg_3v3>;
+	cd-gpios = <&pio 5 6 GPIO_ACTIVE_LOW>; /* PF6 */
+	disable-wp;
+	bus-width = <4>;
+	status = "okay";
+};
+
+&mmc2 {
+	bootph-all;
+    pinctrl-0 = <&mmc2_pins>;
+    pinctrl-names = "default";
+    vmmc-supply = <&reg_3v3>;
+    non-removable;
+    disable-wp;
+    bus-width = <4>;
+    status = "okay";
+};
+
+&emac {
+	pinctrl-0 = <&rmii_pe_pins>;
+	pinctrl-names = "default";
+	phy-mode = "rmii";
+	phy-handle = <&ethphy>;
+	status = "okay";
+
+	mdio {
+		ethphy: ethernet-phy@1 {
+			reg = <1>;
+			compatible = "ethernet-phy-id0007.c0f0",
+				     "ethernet-phy-ieee802.3-c22";
+			smsc,disable-energy-detect;
+		};
+	};
+};
