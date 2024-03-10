@@ -609,6 +609,8 @@ static const struct sunxi_pinctrl_function sun20i_d1_pinctrl_functions[] = {
 	{ "spi0",	2 },	/* PC2-PC7 */
 #if IS_ENABLED(CONFIG_UART0_PORT_F)
 	{ "uart0",	3 },	/* PF2,PF4 */
+#elif IS_ENABLED(CONFIG_UART0_PORT_G)
+	{ "uart0",	7 },	/* PG17-PG18 */
 #else
 	{ "uart0",	6 },	/* PB0-PB1, PB8-PB9, PE2-PE3 */
 #endif
@@ -616,7 +618,7 @@ static const struct sunxi_pinctrl_function sun20i_d1_pinctrl_functions[] = {
 #if IS_ENABLED(CONFIG_UART2_PORT_E)
 	{ "uart2",	3 },	/* PE2-PE3 */
 #elif IS_ENABLED(CONFIG_UART2_PORT_G)
-	{ "uart2",      2 },    /* PG17-PG18 */
+	{ "uart2",  2 },    /* PG17-PG18 */
 #else
 	{ "uart2",	7 },	/* PB0-PB1 */
 #endif
